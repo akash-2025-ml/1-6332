@@ -2,17 +2,17 @@ Signal Name,Type,Type Explanation,Detailed description
 sender_known_malicious,bool,"1(malicious), 0(non-malicious)",Indicates whether the sender's email address is already flagged in internal or external threat intelligence feeds. Helps in fast identification and blocking of known bad actors without requiring additional analysis.
 sender_domain_reputation_score,float,"1(Good Reputation), 0(Bad Reputation ) 
 Any value inbetween based on the confidencce level","Represents a quantitative reputation score of the sender's domain based on historical behavior, known associations, and external threat intelligence. Low scores may suggest spam or malicious activity sources."
-sender_spoof_detected,bool,"1(Spoofed domain), 0(non-spoofed domain)",Determines if the sender’s address appears to impersonate another trusted domain using techniques like domain similarity or visual homographs. Useful in detecting phishing and BEC attempts.
+sender_spoof_detected,bool,"1(Spoofed domain), 0(non-spoofed domain)",Determines if the sender√ïs address appears to impersonate another trusted domain using techniques like domain similarity or visual homographs. Useful in detecting phishing and BEC attempts.
 sender_temp_email_likelihood,float,"1.0(temporary email),0.0(not-temporary email), any value inbeteen  (suspicious) based on the confidence level ","Estimates the likelihood that the sender is using a disposable or temporary email address, which is often associated with spam campaigns, fraud, or low-reputation activity."
 dmarc_enforced,bool,"1(enforced), 0(not enforced)","Indicates whether the DMARC policy published by the domain owner is enforced, ensuring that messages failing SPF/DKIM checks are rejected or quarantined. A strong indicator of sender authenticity."
 packer_detected,bool,"1(obfuscated attachment), 0(non-obfuscated attachment)",Flags whether a known executable packer or obfuscator is used in the attachment. Obfuscators hide malicious intent and are a common feature in malware to bypass detection.
 any_file_hash_malicious,bool,"1(malicious), 0(non-malicious)","True if the cryptographic hash (e.g., SHA-256) of any attachment matches a known malware sample in global or internal threat intelligence databases. Strong indicator of known threats."
 max_metadata_suspicious_score,float,Maximum metadata score across all attachment; 1- Most suspecious 0- Least suspecious,"Reflects the highest suspicious score derived from file metadata analysis (e.g., authorship anomalies, unusual timestamps). Helps detect files that may not be overtly malicious but exhibit risky traits."
 malicious_attachment_count,int,"X (Number of malicious file marked as malicious), 0 (no malicious file found across)",Indicates the total number of attachments in an email that have been positively identified as malicious through sandbox or static detection. A critical risk signal.
-has_executable_attachment,bool,"1(executable), 0(not-executable)","True if the email contains executable file attachments (e.g., .exe, .js, .vbs). These files can run code on the user’s system and are a high-risk vector for malware."
+has_executable_attachment,bool,"1(executable), 0(not-executable)","True if the email contains executable file attachments (e.g., .exe, .js, .vbs). These files can run code on the user√ïs system and are a high-risk vector for malware."
 unscannable_attachment_present,bool,"1(Unscannable files), 0(Scannable files) ","Flags if one or more attachments could not be scanned due to encryption, corruption, or unsupported format. Such files evade analysis and can conceal malicious content."
 total_components_detected_malicious,int,"X (Sum of all malicious components), 0(Zero malicious component found)","Represents the total count of file components extracted (e.g., embedded files, scripts) that were identified as malicious using static or behavioral analysis. Key signal in threat scoring."
-total_yara_match_count,int,"X (Total number of yara rules hit), 0 (Zero yara hits)","Number of YARA rules that matched against the attachment’s content. YARA rules are pattern-based signatures for identifying malware families, suspicious characteristics, and threat behaviors."
+total_yara_match_count,int,"X (Total number of yara rules hit), 0 (Zero yara hits)","Number of YARA rules that matched against the attachment√ïs content. YARA rules are pattern-based signatures for identifying malware families, suspicious characteristics, and threat behaviors."
 total_ioc_count,int,"X (Total number of ioc hits), 0 (zero ioc found)","Counts how many indicators of compromise (IOCs) such as malicious domains, IPs, or hashes were found in files. Used to correlate with known campaigns or threat actors."
 max_behavioral_sandbox_score,float,"X (Maximum threat score from execution out of all attachments)
 1- worst severity score
@@ -49,10 +49,10 @@ smtp_ip_asn,Float,"ASN category of SMTP IP address - Risk Score
 smtp_ip_reputation_score,float,"1.0(trustworthy),0.0(untrustworthy), inbetween (suspicious based on the confidence)","Reputation score of the SMTP IP derived from historical sending behavior, blacklists, and infrastructure metadata."
 domain_known_malicious,bool,"1(malicious), 0(non-malicious)","Flags if any domain used in the email (links, images, headers) is listed as malicious in threat intelligence. Strong domain-level indicator of risk."
 url_count,int,X (Unique URL count in email),Total number of distinct URLs extracted from the email content. High URL count can indicate spam or phishing payload delivery.
-dns_morphing_detected,bool,"1(morphing),0(no morphing)","Flags whether DNS morphing or homograph attacks are detected (e.g., replacing ‘o’ with ‘_’). Used for detecting deceptive lookalike domains."
+dns_morphing_detected,bool,"1(morphing),0(no morphing)","Flags whether DNS morphing or homograph attacks are detected (e.g., replacing √îo√ï with √î_√ï). Used for detecting deceptive lookalike domains."
 domain_tech_stack_match_score,float,"1.0(matched),0.0(not matched), 0.5 (half match)",Measures the mismatch between the expected and actual web technology stack of a target domain. Used to flag spoofed or cloned websites.
 is_high_risk_role_targeted,bool,"1(targeted),0(not targeted)","True if the email targets a high-privilege user (e.g., CEO, CFO). High-value targets are often the focus of spear-phishing and BEC campaigns."
-sender_name_similarity_to_vip,float,"1.0(matched),0.0(not matched) inbetween (suspicious based on the confidence)",Measures how visually or linguistically similar the sender’s display name is to a known VIP. Helps detect impersonation at the identity level.
+sender_name_similarity_to_vip,float,"1.0(matched),0.0(not matched) inbetween (suspicious based on the confidence)",Measures how visually or linguistically similar the sender√ïs display name is to a known VIP. Helps detect impersonation at the identity level.
 urgency_keywords_present,bool,"1(Urgency sentiment or keywords exists), 0(Urgency sentiment or keywords does not exists) ","True if the email body or subject contains urgency-related phrases (e.g., 'immediate action', 'ASAP'). Such language is commonly used in social engineering."
 request_type,categorical,"Type of email request
 Value	Description
@@ -62,9 +62,9 @@ Value	Description
 4. ""credential_request"":Asks user to send or reset account login credentials.
 5.""sensitive_data_request"":Requests HR/financial info like tax forms, salary slips, or employee lists.
 6:""document_download"":Requests user to click/download a file that may be malicious or a phishing page.
-7.""link_click""	Asks user to visit a suspicious link — often disguised as internal services.
-8.""urgent_callback"":	Demands user to call a number urgently — may connect to attacker.
-9.""bank_detail_update"":Asks to change vendor or payroll bank details to attacker’s account.
+7.""link_click""	Asks user to visit a suspicious link √ë often disguised as internal services.
+8.""urgent_callback"":	Demands user to call a number urgently √ë may connect to attacker.
+9.""bank_detail_update"":Asks to change vendor or payroll bank details to attacker√ïs account.
 10.""invoice_verification"":Pretends to verify a pending invoice or payment as an authority.
 11.""legal_threat"":	Uses legal urgency or false subpoenas to manipulate behavior.
 12.""executive_request""	Generic directive from ""CEO"" or VIP demanding immediate action.
@@ -75,7 +75,7 @@ content_spam_score,float,"Likelyhood of unsolicited or bulk.
 1-max
 0- min
 inbetween - based on the confidence",Spam score based on a statistical model trained on known spam content. Provides a numerical likelihood that the message is unsolicited or bulk.
-user_marked_as_spam_before,bool,"1(user marked spam),0(user didn’t mark)",True if the user has previously marked similar emails or sender patterns as spam. Helps in adaptive learning models for personalization.
+user_marked_as_spam_before,bool,"1(user marked spam),0(user didn√ït mark)",True if the user has previously marked similar emails or sender patterns as spam. Helps in adaptive learning models for personalization.
 bulk_message_indicator,bool,"1(bulky mail), 0(non bulky mail) ",Flags whether the email is likely part of a bulk message distribution. Bulk messages may bypass detection but still be unwanted or risky.
 unsubscribe_link_present,bool,"1(Unsubscribed link present), 0(Unsubscribed link not present) ",True if the email includes an unsubscribe link. Presence can indicate marketing content but can also be faked in phishing.
 marketing_keywords_detected,float,"1(Marketing term or sentiment or entity exists), 0(Marketing term or sentiment or entity does not exists) ",Likelyhood of being a marketing content. if marketing or promotional language is detected in the content. Used for classifying graymail vs. more harmful spam.
@@ -90,7 +90,7 @@ Value - Description
 4.neutral - The domain makes no claim about this IP (e.g., ?all).
 5.none - No SPF record found for the domain.
 6.temperror - A temporary DNS or infrastructure error occurred during SPF check. Retry later.
-7.permerror - SPF record is malformed or exceeds lookup limits (10 DNS lookups, etc.). Treated as fail by some receivers.",Result of SPF (Sender Policy Framework) check to determine if sender’s IP is authorized to send for the domain.
+7.permerror - SPF record is malformed or exceeds lookup limits (10 DNS lookups, etc.). Treated as fail by some receivers.",Result of SPF (Sender Policy Framework) check to determine if sender√ïs IP is authorized to send for the domain.
 dkim_result,enum,"
 1.pass	 DKIM signature is valid, content was not altered, and signed by authorized domain.	
 2.fail	Signature was present but did not verify (tampered or forged).	
@@ -114,12 +114,12 @@ final_url_known_malicious,bool,"1(bad), 0(good) ",True if the any final resolved
 url_decoded_spoof_detected,bool,"1(bad), 0(good) ",Flags if URL path or parameters are decoded and resemble known brands or login portals. Useful for spoof detection.
 url_reputation_score,float,"0.0(suspicious),1.0(not suspicious); anythng inbetween","Reputation score derived from all URLs in the email. Includes blacklist hits, age, categorization, and past abuse history."
 ssl_validity_status,enum,"1.valid	 The site presents a valid SSL certificate, trusted by a recognized CA.
-2.expired	Certificate has expired — often used by phishing sites.
-3.self_signed	 Certificate is self-signed or untrusted — a red flag.
-4.mismatch	 The certificate’s CN/SAN does not match the domain — indicates spoofing.
-5.revoked	The certificate has been revoked by the CA — rarely seen but serious.
-6.invalid_chain	 Intermediate certs are missing or chain is broken — site not fully trusted.
-7.no_ssl	 The site does not support HTTPS (only HTTP) — insecure and suspicious.
+2.expired	Certificate has expired √ë often used by phishing sites.
+3.self_signed	 Certificate is self-signed or untrusted √ë a red flag.
+4.mismatch	 The certificate√ïs CN/SAN does not match the domain √ë indicates spoofing.
+5.revoked	The certificate has been revoked by the CA √ë rarely seen but serious.
+6.invalid_chain	 Intermediate certs are missing or chain is broken √ë site not fully trusted.
+7.no_ssl	 The site does not support HTTPS (only HTTP) √ë insecure and suspicious.
 8.error	Could not complete SSL handshake or verify (e.g., timeout, TLS error).","Indicates whether the SSL certificate of the final destination URL is valid, expired, or self-signed. Adds to credibility scoring."
 site_visual_similarity_to_known_brand,float,"1.0(malicious),0(non-malicious); inbetween value based on the confidence","Score based on how visually similar the final landing page is to a popular brand (e.g., Microsoft, Google). Indicates phishing."
 url_rendering_behavior_score,float,"1.0(suspicious),0.0(not suspicious); inbetween based on the confidence","Behavior score from rendering the URL in a controlled environment to observe JavaScript actions, redirects, or malicious scripts."
