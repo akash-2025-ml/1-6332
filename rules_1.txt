@@ -1,0 +1,232 @@
+EMAIL SECURITY CLASSIFICATION RULES
+Based on 68 Detection Signals Analysis
+
+===========================================
+CLASSIFICATION HIERARCHY (HIGHEST TO LOWEST PRIORITY)
+===========================================
+
+1. MALICIOUS - Immediate blocking required
+2. WARNING - User verification required  
+3. SPAM - Bulk filtering appropriate
+4. NO ACTION - Clean/legitimate email
+
+===========================================
+AUTOMATIC MALICIOUS CLASSIFICATION RULES
+===========================================
+
+RULE 1: KNOWN THREAT INDICATORS
+If ANY of these = 1, classify as MALICIOUS:
+- sender_known_malicious = 1
+- return_path_known_malicious = 1  
+- domain_known_malicious = 1
+- any_file_hash_malicious = 1
+
+RULE 2: CONFIRMED MALWARE DETECTION
+If ANY of these > 0, classify as MALICIOUS:
+- total_components_detected_malicious > 0
+- total_yara_match_count > 0
+- malicious_attachment_count > 0
+
+RULE 3: HIGH-CONFIDENCE BEHAVIORAL THREATS
+If ANY behavioral score > 0.70 (70%) AND confirmed malicious components/IOCs/YARA, classify as MALICIOUS:
+- max_behavioral_sandbox_score > 0.70
+- max_exfiltration_behavior_score > 0.70
+- max_amsi_suspicion_score > 0.70
+Note: High behavioral scores WITHOUT confirmed threats = WARNING
+
+RULE 4: EXECUTABLE THREATS WITH HIGH SCORES
+If has_executable_attachment = 1 AND any behavioral score > 0.50, classify as MALICIOUS
+
+RULE 5: DANGEROUS CODE EXECUTION
+If ANY combination of these, classify as MALICIOUS:
+- has_executable_attachment = 1 + any_macro_enabled_document = 1
+- has_executable_attachment = 1 + any_active_x_objects_detected = 1
+- any_macro_enabled_document = 1 + any_network_call_on_open = 1
+
+RULE 6: FINANCIAL FRAUD PATTERNS
+If request_type IN ["wire_transfer", "bank_detail_update", "gift_card_request"] AND:
+- Authentication failures (SPF/DKIM/DMARC fail) OR
+- urgency_keywords_present > 0.60 OR
+- sender_spoof_detected = 1 OR
+- Any behavioral score > 0.40
+Then classify as MALICIOUS
+
+RULE 7: CREDENTIAL THEFT ATTEMPTS
+If request_type = "vpn_or_mfa_reset" AND ANY of:
+- Authentication failures
+- Behavioral scores > 0.30
+- ssl_validity_status IN ["self_signed", "expired"]
+Then classify as MALICIOUS
+
+RULE 8: CONFIRMED SPOOFING ATTACKS
+If return_path_mismatch_with_from = 1 AND:
+- Authentication failures (DKIM fail OR DMARC fail) AND
+- request_type IN ["meeting_request", "wire_transfer", "invoice_verification"]
+Then classify as MALICIOUS
+
+===========================================
+WARNING CLASSIFICATION RULES
+===========================================
+
+RULE 9: MIXED THREAT SIGNALS
+Classify as WARNING when:
+- Behavioral scores between 0.30 - 0.70 AND
+- No confirmed malware detection AND
+- Some authentication concerns
+
+RULE 10: SUSPICIOUS FINANCIAL REQUESTS
+If request_type IN ["wire_transfer", "bank_detail_update", "invoice_verification"] AND:
+- Some authentication pass but not all AND
+- Behavioral scores < 0.40 AND
+- No confirmed malware
+Then classify as WARNING
+
+RULE 11: AUTHENTICATION INCONSISTENCIES
+If mixed authentication results:
+- Some pass, some fail (e.g., SPF pass but DMARC fail)
+- AND no confirmed threats
+- AND request_type requires verification
+Then classify as WARNING
+
+RULE 12: INFRASTRUCTURE CONCERNS
+If ANY of these WITHOUT confirmed threats:
+- ssl_validity_status IN ["expired", "self_signed"]
+- return_path_known_malicious = 1 BUT very low threat scores
+- sender_spoof_detected = 1 WITHOUT malicious components
+- url_shortener_detected = 1 WITH other suspicious indicators
+Then classify as WARNING
+
+RULE 13: HIGH URGENCY WITHOUT OTHER THREATS
+If urgency_keywords_present > 0.70 BUT:
+- No confirmed malware
+- Good authentication mostly
+- Low spam scores
+Then classify as WARNING
+
+===========================================
+SPAM CLASSIFICATION RULES
+===========================================
+
+RULE 14: HIGH SPAM PROBABILITY
+If content_spam_score > 0.70 AND:
+- No malicious components detected
+- No high-risk request types
+- No strong security indicators (e.g., DMARC enforced)
+Then classify as SPAM
+
+RULE 15: POOR SENDER REPUTATION
+If sender_domain_reputation_score < 0.10 AND:
+- No confirmed threats
+- High spam patterns
+- No specific targeting
+Then classify as SPAM
+
+RULE 16: BULK MESSAGING INDICATORS
+If bulk_message_indicator = 1 OR:
+- marketing_keywords_detected > 0.50
+- unsubscribe_link_present = 1
+- AND no malicious indicators
+Then classify as SPAM
+
+RULE 17: AUTHENTICATION FAILURES WITH SPAM
+If multiple authentication failures (2+ of SPF/DKIM/DMARC) AND:
+- High spam score (> 0.70)
+- No confirmed malware
+- No high-risk requests
+Then classify as SPAM
+
+RULE 18: LEGITIMATE COMMERCIAL SPAM
+If request_type = "gift_card_request" AND:
+- Good sender reputation (> 0.50)
+- Very low spam score (< 0.10)
+- Good authentication (SPF/DKIM pass)
+Then classify as SPAM (legitimate promotion)
+
+===========================================
+NO ACTION CLASSIFICATION RULES
+===========================================
+
+RULE 19: CLEAN SECURITY PROFILE
+Classify as NO ACTION when ALL of:
+- No malicious indicators (all = 0)
+- All authentication pass (SPF, DKIM, DMARC)
+- Very low threat scores (all < 0.10)
+- No high-risk request types
+
+RULE 20: LEGITIMATE BUSINESS EMAIL
+If request_type = "none" AND:
+- Good authentication OR strong security indicators (DMARC enforced)
+- Valid SSL certificate
+- Low spam score (< 0.30) OR overridden by security indicators
+- No threat indicators
+Then classify as NO ACTION
+
+RULE 21: FALSE POSITIVE INDICATORS
+If very low scores across all threats:
+- All behavioral scores < 0.05
+- Spam score < 0.10
+- Good reputation scores
+- Despite minor technical issues
+Then classify as NO ACTION
+
+===========================================
+SPECIAL CONSIDERATIONS
+===========================================
+
+1. PRIORITY OVERRIDE RULES:
+   - Confirmed malware ALWAYS overrides other signals
+   - Known malicious senders/domains ALWAYS = Malicious
+   - Return path mismatch + auth failures + high-risk request = Malicious
+
+2. BEHAVIORAL SCORE THRESHOLDS:
+   - > 0.70 (70%) WITH confirmed threats = Malicious
+   - > 0.70 (70%) WITHOUT confirmed threats = Warning
+   - 0.30 - 0.70 = Medium confidence = Warning
+   - < 0.30 = Low confidence = Consider other signals
+
+3. AUTHENTICATION WEIGHT:
+   - All pass = Strong legitimate signal
+   - All fail = Strong malicious signal
+   - Mixed = Requires other signal analysis
+
+4. REQUEST TYPE RISK LEVELS:
+   HIGH RISK: wire_transfer, bank_detail_update, vpn_or_mfa_reset, credential_request
+   MEDIUM RISK: gift_card_request, invoice_verification, sensitive_data_request
+   LOW RISK: meeting_request, document_download, none
+
+5. SOCIAL ENGINEERING INDICATORS:
+   - legal_threat = High manipulation risk
+   - urgency_keywords > 0.60 = Pressure tactics
+   - sender_name_similarity_to_vip > 0.80 = Impersonation
+
+===========================================
+CLASSIFICATION DECISION TREE
+===========================================
+
+START
+  |
+  ├─> Known malicious entity? (sender/domain/return_path) → YES → MALICIOUS
+  |                                                          ↓ NO
+  ├─> Confirmed malware? (components/YARA/hash) → YES → MALICIOUS
+  |                                                ↓ NO
+  ├─> High behavioral scores? (>70%) → YES → MALICIOUS
+  |                                      ↓ NO
+  ├─> High-risk request + auth issues? → YES → MALICIOUS/WARNING (context)
+  |                                       ↓ NO
+  ├─> Spam patterns + no threats? → YES → SPAM
+  |                                  ↓ NO
+  ├─> Clean profile + good auth? → YES → NO ACTION
+  |                                 ↓ NO
+  └─> Mixed signals → WARNING
+
+===========================================
+IMPLEMENTATION NOTES
+===========================================
+
+1. Always check automatic Malicious rules first
+2. Confirmed threats override reputation scores
+3. Behavioral analysis trumps static analysis
+4. Authentication failures amplify other risks
+5. Context matters - combine signals holistically
+6. When in doubt between classifications, choose higher risk category
+7. Document justification using specific signal values
