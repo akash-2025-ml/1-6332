@@ -35,7 +35,12 @@ If ANY behavioral score > 0.70 (70%) AND confirmed malicious components/IOCs/YAR
 Note: High behavioral scores WITHOUT confirmed threats = WARNING
 
 RULE 4: EXECUTABLE THREATS WITH HIGH SCORES
-If has_executable_attachment = 1 AND any behavioral score > 0.50, classify as MALICIOUS
+If has_executable_attachment = 1 AND any behavioral score > 0.50
+- Authentication failures (SPF/DKIM/DMARC fail) OR
+- urgency_keywords_present > 0.60 OR
+- sender_spoof_detected = 1 OR
+- Any behavioral score > 0.40, 
+classify as MALICIOUS
 
 RULE 5: DANGEROUS CODE EXECUTION
 If ANY combination of these, classify as MALICIOUS:
@@ -54,7 +59,7 @@ Then classify as MALICIOUS
 RULE 7: CREDENTIAL THEFT ATTEMPTS
 If request_type = "vpn_or_mfa_reset" AND ANY of:
 - Authentication failures
-- Behavioral scores > 0.30
+- Behavioral scores > 0.60
 - ssl_validity_status IN ["self_signed", "expired"]
 Then classify as MALICIOUS
 
@@ -73,6 +78,7 @@ Classify as WARNING when:
 - Behavioral scores between 0.30 - 0.70 AND
 - No confirmed malware detection AND
 - Some authentication concerns
+- If has_executable_attachment = 1 AND any behavioral score > 0.50
 
 RULE 10: SUSPICIOUS FINANCIAL REQUESTS
 If request_type IN ["wire_transfer", "bank_detail_update", "invoice_verification"] AND:
@@ -108,7 +114,7 @@ SPAM CLASSIFICATION RULES
 ===========================================
 
 RULE 14: HIGH SPAM PROBABILITY
-If content_spam_score > 0.70 AND:
+If content_spam_score > 0.60 AND:
 - No malicious components detected
 - No high-risk request types
 - No strong security indicators (e.g., DMARC enforced)
@@ -130,14 +136,14 @@ Then classify as SPAM
 
 RULE 17: AUTHENTICATION FAILURES WITH SPAM
 If multiple authentication failures (2+ of SPF/DKIM/DMARC) AND:
-- High spam score (> 0.70)
+- High spam score (> 0.60)
 - No confirmed malware
 - No high-risk requests
 Then classify as SPAM
 
 RULE 18: LEGITIMATE COMMERCIAL SPAM
 If request_type = "gift_card_request" AND:
-- Good sender reputation (> 0.50)
+- Good sender reputation (> 0.55)
 - Very low spam score (< 0.10)
 - Good authentication (SPF/DKIM pass)
 Then classify as SPAM (legitimate promotion)
